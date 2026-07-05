@@ -1,0 +1,75 @@
+{
+  "name": "@zandoh/keysmith",
+  "version": "0.0.0",
+  "description": "Fast, unstyled, accessible hotkey & shortcut manager — framework-agnostic web components.",
+  "keywords": [
+    "a11y",
+    "accessible",
+    "chords",
+    "custom-elements",
+    "framework-agnostic",
+    "headless",
+    "hotkeys",
+    "keybindings",
+    "keyboard-shortcuts",
+    "unstyled",
+    "web-components"
+  ],
+  "homepage": "https://github.com/zandoh/keysmith#readme",
+  "bugs": {
+    "url": "https://github.com/zandoh/keysmith/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "zandoh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zandoh/keysmith.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "knip": "knip",
+    "type-check": "tsc --noEmit",
+    "check": "oxlint && oxfmt --check && tsc --noEmit && knip",
+    "prepublishOnly": "bun run build"
+  },
+  "devDependencies": {
+    "knip": "^5",
+    "oxfmt": "^0",
+    "oxlint": "^1",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,5 +1,5 @@
 # CI status and release announcements to Discord via the shared tonk layer
-# (secret: DISCORD_WEBHOOK). Personality: .github/discord.yml
+# (secret: TONK_DISCORD_WEBHOOK). Personality: .github/discord.yml
 #
 # Releases are published manually (changeset publish runs locally), so the
 # `release` event is user-authored and does trigger this workflow — unlike
@@ -20,7 +20,7 @@ jobs:
       actions: read # recovery detection reads previous run conclusions
     uses: zandoh/tonk/.github/workflows/notify.yml@v1
     secrets:
-      webhook: ${{ secrets.DISCORD_WEBHOOK }}
+      webhook: ${{ secrets.TONK_DISCORD_WEBHOOK }}
 
   release:
     if: github.event_name == 'release'
@@ -45,7 +45,7 @@ jobs:
       - name: Announce npm publish on Discord
         uses: zandoh/tonk/actions/discord-notify@v1
         with:
-          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook-url: ${{ secrets.TONK_DISCORD_WEBHOOK }}
           title: 📦 @zandoh/keysmith ${{ steps.notes.outputs.version }} published to npm
           description: ${{ steps.notes.outputs.body }}
           url: https://www.npmjs.com/package/@zandoh/keysmith/v/${{ steps.notes.outputs.version }}

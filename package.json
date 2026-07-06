@@ -1,6 +1,6 @@
 {
   "name": "@zandoh/keysmith",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Fast, unstyled, accessible hotkey and shortcut manager, built as framework-agnostic web components.",
   "keywords": [
     "a11y",

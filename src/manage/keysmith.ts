@@ -172,20 +172,12 @@ function subscribe(unsubscribe: () => void, signal?: AbortSignal): () => void {
 export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
   const platform = options.platform ?? detectPlatform();
   const reportError = options.onError ?? ((error: unknown) => console.error(error));
-  const bus = createEventBus<Record<string, TriggerPayload>>();
-
-  // Every handler crosses the bus wrapped, so sync throws and async
-  // rejections reach onError regardless of the bus's own error policy.
-  function guard(handler: TriggerHandler): (payload: TriggerPayload) => void {
-    return (payload) => {
-      try {
-        const result = handler(payload);
-        if (result instanceof Promise) result.catch(reportError);
-      } catch (error) {
-        reportError(error);
-      }
-    };
-  }
+  // Handler errors never propagate out of the bus's emit(); its config
+  // onError hook (tsbus >= 0.1.0) routes sync throws and async rejections
+  // to ours.
+  const bus = createEventBus<Record<string, TriggerPayload>>({
+    onError: (_event, _payload, error) => reportError(error),
+  });
   const registrations = new Map<string, Registration>();
   const activeScopes = new Set<string>(["global"]);
 
@@ -302,7 +294,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     warnReserved(id, binding);
 
     if (commandOptions.onTrigger) {
-      reg.removeTrigger = bus.on(reg.scopedEvent, guard(commandOptions.onTrigger));
+      reg.removeTrigger = bus.on(reg.scopedEvent, commandOptions.onTrigger);
     }
 
     registrations.set(id, reg);
@@ -328,7 +320,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     if (!reg) {
       throw new Error(`keysmith: unknown command "${commandId}" (add it before subscribing)`);
     }
-    const unsubscribe = bus.on(reg.scopedEvent, guard(handler), {
+    const unsubscribe = bus.on(reg.scopedEvent, handler, {
       priority: subscribeOptions?.priority,
     });
     return subscribe(unsubscribe, subscribeOptions?.signal);
@@ -340,8 +332,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     subscribeOptions?: SubscribeOptions,
   ): () => void {
     assertAlive();
-    const guarded = guard(handler);
-    const unsubscribe = bus.onPattern(pattern, (payload) => guarded(payload as TriggerPayload), {
+    const unsubscribe = bus.onPattern(pattern, (payload) => handler(payload as TriggerPayload), {
       priority: subscribeOptions?.priority,
     });
     return subscribe(unsubscribe, subscribeOptions?.signal);

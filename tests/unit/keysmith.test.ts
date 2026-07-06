@@ -273,4 +273,19 @@ describe("lifecycle", () => {
     press("b", { ctrlKey: true });
     await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
   });
+
+  it("routes async handler rejections to onError", async () => {
+    const onError = vi.fn();
+    const keys = make({ onError });
+    keys.add({
+      id: "boom.async",
+      keys: "mod+b",
+      onTrigger: async () => {
+        throw new Error("async boom");
+      },
+    });
+
+    press("b", { ctrlKey: true });
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
+  });
 });

@@ -1,11 +1,12 @@
 /**
  * @zandoh/keysmith
  *
- * Hotkey and shortcut manager for the web. Fast, unstyled, accessible,
+ * Keyboard shortcut manager for the web. Fast, unstyled, accessible,
  * framework agnostic.
  *
- * Placeholder release. No usable API yet; see the README for what's planned.
+ * Work in progress; see docs/SPEC.md for the design. Currently exposes the
+ * binding notation parser (M0).
  */
 
-export const name = "@zandoh/keysmith";
-export const version = "0.0.0";
+export type { BaseKind, ChordMode, ParsedBinding, ParsedChord } from "./recognize/parse";
+export { BindingParseError, parseBinding } from "./recognize/parse";

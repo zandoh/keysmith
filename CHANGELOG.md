@@ -58,4 +58,3 @@ by [git-cliff](https://git-cliff.org).
 ### Maintenance
 
 - Scaffold @zandoh/keysmith placeholder
-

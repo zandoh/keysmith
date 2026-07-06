@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>keysmith — a shortcut manager, not a key binder</title>
+    <meta
+      name="description"
+      content="Keyboard shortcut manager for the web: commands, scopes, sequences, user remapping. Fast, unstyled, accessible, framework agnostic."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='7' fill='%23221D18' stroke='%23E8853B' stroke-width='2'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' font-weight='bold' fill='%23FFB84D' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#docs">Skip to documentation</a>
+
+    <header class="topbar">
+      <span class="wordmark">keysmith</span>
+      <nav class="topbar-links">
+        <a href="https://github.com/zandoh/keysmith">GitHub</a>
+        <a href="https://www.npmjs.com/package/@zandoh/keysmith">npm</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <h1>A shortcut manager,<br />not a key binder.</h1>
+        <p class="lede">
+          keysmith gives shortcuts stable command identity: keys attach to commands, scopes decide
+          where they fire, and users can remap or disable any of them. Framework agnostic. No UI.
+          One dependency.
+        </p>
+
+        <div class="install" role="group" aria-label="Install command">
+          <code>bun add @zandoh/keysmith</code>
+          <button type="button" id="copy-install" aria-label="Copy install command">copy</button>
+        </div>
+
+        <div class="forge" aria-label="Live keystroke visualizer">
+          <p class="forge-hint">
+            This strip is keysmith running on this page. Press some keys — try
+            <kbd>g</kbd> <kbd>d</kbd>, or <kbd>?</kbd> for the cheatsheet.
+          </p>
+          <div class="forge-strip" id="forge-strip" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="pitch" id="manager">
+        <h2>Commands, not callbacks on keys</h2>
+        <div class="pitch-grid">
+          <div class="pitch-item">
+            <h3>Stable identity</h3>
+            <p>
+              Handlers subscribe to <code>file.save</code>, not <code>mod+s</code>. Remapping
+              changes keys, never code.
+            </p>
+          </div>
+          <div class="pitch-item">
+            <h3>Scopes</h3>
+            <p>
+              A binding belongs to a scope; activate and deactivate them as your UI changes.
+              Collisions are reported, not silent.
+            </p>
+          </div>
+          <div class="pitch-item">
+            <h3>Sequences</h3>
+            <p>
+              <code>g i</code>, <code>mod+k mod+s</code> — chords and sequences share one recognizer
+              with timeouts.
+            </p>
+          </div>
+          <div class="pitch-item">
+            <h3>Correct on every layout</h3>
+            <p>
+              IME and dead keys never match. AltGr text entry is never stolen. Alt chords survive
+              macOS composition. Symbols match with or without shift.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="remap" id="remap">
+        <h2>Users can remap anything</h2>
+        <p>
+          WCAG 2.1.4 requires single-character shortcuts to be remappable or disableable. keysmith's
+          keymap layer is that mechanism — try it on the
+          <code>forge.ping</code> command:
+        </p>
+        <div class="remap-demo">
+          <div class="remap-controls" role="group" aria-label="Remap forge.ping">
+            <span class="remap-current">
+              <code>forge.ping</code> is bound to <kbd id="ping-keys">mod+j</kbd>
+            </span>
+            <div class="remap-buttons">
+              <button type="button" data-remap="mod+m">remap to mod+m</button>
+              <button type="button" data-remap="p p">remap to p p</button>
+              <button type="button" data-remap="null">disable</button>
+              <button type="button" data-remap="reset">reset</button>
+            </div>
+          </div>
+          <div class="remap-out">
+            <span class="remap-out-label">exportKeymap()</span>
+            <pre id="keymap-json">{}</pre>
+          </div>
+        </div>
+        <p class="remap-count" id="ping-count" aria-live="polite">
+          forge.ping has fired 0 times. Press its binding.
+        </p>
+      </section>
+
+      <section class="docs" id="docs">
+        <h2>Quick start</h2>
+        <pre class="code-block"><code>import { createKeysmith } from "@zandoh/keysmith";
+
+const keys = createKeysmith();
+
+keys.add({
+  id: "file.save",
+  keys: "mod+s", // Meta on macOS, Control elsewhere
+  description: "Save the current file",
+  onTrigger: () => save(),
+});
+
+keys.add({ id: "go.inbox", keys: "g i", scope: "list" });
+keys.on("go.inbox", () => router.push("/inbox"));
+keys.activate("list");
+
+// user remapping, persisted
+keys.remap("go.inbox", "g m");
+localStorage.setItem("keymap", JSON.stringify(keys.exportKeymap()));
+
+// data for your cheatsheet: descriptions, groups, "⌘S" / "Ctrl+S"
+keys.commands();</code></pre>
+        <p class="docs-links">
+          Full design notes and API in the
+          <a href="https://github.com/zandoh/keysmith/blob/main/docs/SPEC.md">spec</a> and
+          <a href="https://github.com/zandoh/keysmith/blob/main/README.md">readme</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>MIT · <a href="https://github.com/zandoh">zandoh</a></span>
+      <span class="footer-note">this page runs on keysmith — press <kbd>?</kbd></span>
+    </footer>
+
+    <dialog id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <div class="cheatsheet-head">
+        <h2 id="cheatsheet-title">Shortcuts on this page</h2>
+        <button type="button" id="cheatsheet-close" aria-label="Close">esc</button>
+      </div>
+      <p class="cheatsheet-sub">Generated live from <code>keys.commands()</code>.</p>
+      <ul id="cheatsheet-list"></ul>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

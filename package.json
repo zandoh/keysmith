@@ -59,15 +59,26 @@
     "format:check": "oxfmt --check",
     "knip": "knip",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "check": "oxlint && oxfmt --check && tsc --noEmit && knip",
+    "bump": "changeset version",
+    "release": "changeset publish",
+    "prepare": "simple-git-hooks",
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "happy-dom": "^20.10.6",
     "knip": "^5",
     "oxfmt": "^0",
     "oxlint": "^1",
+    "simple-git-hooks": "^2.13.1",
     "tsup": "^8",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bun run check && bun run test"
   },
   "engines": {
     "node": ">=18"

@@ -15,6 +15,7 @@ jobs:
       - run: bun run check
       - run: bun run test
       - run: bun run build
+      - run: bun run size
 
   browser:
     runs-on: ubuntu-latest

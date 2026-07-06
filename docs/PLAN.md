@@ -54,7 +54,8 @@ The correctness moat, proven before any manager exists.
 
 - [x] `demo/` app: the docs site at zandoh.github.io/keysmith exercises
       sequences, remapping, and a help overlay built from `commands()`
-- [ ] Decide the cheatsheet-element open question with that experience
+- [x] Decide the cheatsheet-element open question: not shipping a UI
+      element; the recipe lives in docs/cheatsheet.md (spec section 6)
 - [x] Playwright layout matrix (AZERTY, QWERTZ AltGr, Dvorak, macOS alt
       composition, IME/dead keys) through the real browser event pipeline
 - [x] Server rendering guide (docs/ssr.md) with the manifest seam, plus
@@ -63,14 +64,29 @@ The correctness moat, proven before any manager exists.
 
 ### M4: docs and hardening (0.4.0)
 
-- [ ] Docs site from the demo; README rewrite with live examples
-- [ ] Framework smoke tests (React, Vue, Svelte, plain HTML)
-- [ ] Size budget enforcement in CI
+- [x] Docs site live at zandoh.github.io/keysmith; README rewritten with
+      badges and reference tables
+- [x] Framework smoke tests: React 19 (act-driven under happy-dom), Vue 3,
+      Svelte 5 (browser resolve condition), plus plain HTML via the browser
+      fixture. Quirks documented in the test files themselves
+- [x] Size budget enforcement in CI (scripts/size.ts against spec section 4)
 
 ### M5: toward 1.0
 
-- [ ] API freeze; 1.0 criteria: layout matrix green, zero known a11y issues,
-      budgets green, docs complete
+Criteria, each verifiable in the repo:
+
+- [x] Layout matrix green in CI (Playwright browser job)
+- [x] Size budgets green in CI (5.5 kB standalone / 7.5 kB with tsbus)
+- [x] Framework smoke tests green (React, Vue, Svelte, plain HTML)
+- [x] All spec open questions resolved (spec section 6)
+- [x] WCAG 2.1.4 mechanism shipped and documented (docs/remapping.md)
+- [x] Docs complete: spec, remapping, ssr, cheatsheet, changelog, live site
+- [ ] API freeze: one full minor cycle (0.4.x) with no breaking API change
+- [ ] Manual screen reader pass (VoiceOver) recorded against the demo site
+- [ ] External signal: at least one real consumer or issue-driven iteration
+      before calling the surface proven
+
+When the three open boxes close, ship 1.0.0.
 
 ## Working agreements
 

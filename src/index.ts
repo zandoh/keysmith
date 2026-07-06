@@ -1,10 +1,10 @@
 /**
  * @zandoh/keysmith
  *
- * Fast, unstyled, accessible hotkey & shortcut manager.
- * Framework-agnostic web components.
+ * Hotkey and shortcut manager for the web. Fast, unstyled, accessible,
+ * framework agnostic.
  *
- * 🚧 Placeholder release — the real API is being forged. See the README.
+ * Placeholder release. No usable API yet; see the README for what's planned.
  */
 
 export const name = "@zandoh/keysmith";

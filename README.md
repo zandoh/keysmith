@@ -1,20 +1,20 @@
-# @zandoh/keysmith
+# keysmith
 
-> Fast, unstyled, accessible hotkey & shortcut manager — framework-agnostic web components.
+Hotkey and shortcut manager for the web. Fast, unstyled, accessible, and framework
+agnostic.
 
-🚧 **Work in progress.** This is an early `0.0.0` placeholder to reserve the name while the real API is being forged. Not ready for use yet.
+This is a name-reservation release. There is no usable API yet. Design notes
+live in [docs/SPEC.md](./docs/SPEC.md).
 
-## The idea
+## Planned
 
-A keyboard-shortcut engine in the [`cmdk`](https://github.com/pacocoursey/cmdk) spirit — **fast, unstyled, accessible** — but shipped as framework-agnostic web components so it drops into React, Vue, Svelte, or plain HTML alike.
+- Chords and sequences: `mod+k`, or Gmail-style `g` then `i`
+- Scopes, so a shortcut only fires in the part of the app it belongs to
+- Conflict detection when two bindings claim the same keys
+- A generated cheatsheet overlay listing every active shortcut
+- Sane behavior while text inputs are focused
 
-Planned:
-
-- **Chords & sequences** — `mod+k`, or Gmail-style `g` then `i`
-- **Scopes / contexts** — shortcuts that only fire in the right place
-- **Conflict detection** — catch two bindings fighting over the same keys
-- **Auto-generated cheatsheet** — a `?` overlay of every active shortcut, for free
-- **Respects typing** — never hijacks keys while an input is focused
+Ships as web components, so it works the same in React, Vue, Svelte, or plain HTML.
 
 ## Install
 
@@ -22,6 +22,6 @@ Planned:
 bun add @zandoh/keysmith
 ```
 
----
+## License
 
-Part of the `@zandoh` workbench. Built with a wrench and a bit of gnomish engineering. 🔧
+MIT

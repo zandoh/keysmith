@@ -55,11 +55,11 @@ The correctness moat, proven before any manager exists.
 - [x] `demo/` app: the docs site at zandoh.github.io/keysmith exercises
       sequences, remapping, and a help overlay built from `commands()`
 - [ ] Decide the cheatsheet-element open question with that experience
-- [ ] Playwright layout matrix (QWERTY, AZERTY, QWERTZ, Dvorak samples)
-- [ ] Server rendering guide (docs/ssr.md): construct-safe usage, the
-      serializable seam (command manifest + handlers-by-id + keymap), the
-      platform hint for server-rendered display strings; consider an
-      `addAll(manifest)` convenience
+- [x] Playwright layout matrix (AZERTY, QWERTZ AltGr, Dvorak, macOS alt
+      composition, IME/dead keys) through the real browser event pipeline
+- [x] Server rendering guide (docs/ssr.md) with the manifest seam, plus
+      `addAll(manifest)` and layout-aware display via KeyboardLayoutMap
+      (`getLayoutMap()`, `commands(layout)`)
 
 ### M4: docs and hardening (0.4.0)
 

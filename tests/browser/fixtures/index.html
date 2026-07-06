@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>keysmith browser fixture</title>
+  </head>
+  <body>
+    <input id="text-input" aria-label="fixture input" />
+    <script type="module">
+      import { createKeysmith } from "/src/index.ts";
+
+      const params = new URLSearchParams(location.search);
+      const platform = params.get("platform") ?? "other";
+
+      const fired = [];
+      window.__fired = fired;
+      window.__prevented = [];
+      window.__keys = createKeysmith({ platform });
+
+      const definitions = [
+        { id: "save", keys: "mod+s" },
+        { id: "inbox", keys: "g i" },
+        { id: "down", keys: "j" },
+        { id: "escape.ok", keys: "escape", allowInEditable: true },
+        { id: "pos.w", keys: "w", mode: "position" },
+        { id: "brace", keys: "{" },
+        { id: "combo", keys: "ctrl+alt+e" },
+        { id: "alt.k", keys: "alt+k" },
+      ];
+      for (const definition of definitions) {
+        window.__keys.add({ ...definition, onTrigger: (p) => fired.push(p.commandId) });
+      }
+
+      // Registered after keysmith's listener, so it observes defaultPrevented.
+      window.addEventListener("keydown", (event) => {
+        window.__prevented.push([event.key, event.defaultPrevented]);
+      });
+
+      window.__ready = true;
+    </script>
+  </body>
+</html>

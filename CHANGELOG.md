@@ -3,6 +3,29 @@
 Generated from [Conventional Commits](https://www.conventionalcommits.org)
 by [git-cliff](https://git-cliff.org).
 
+## [0.3.0] - 2026-07-06
+
+### Features
+
+- Add docs site with live keysmith demo
+
+### Bug fixes
+
+- Allow @zandoh/tsbus 0.1.x
+
+### Refactoring
+
+- Route handler errors through the bus onError hook
+
+### Documentation
+
+- Professional readme pass and accurate package metadata
+
+### Maintenance
+
+- Generate release notes with git-cliff
+- Drop redundant knip ignore for git-cliff
+
 ## [0.2.0] - 2026-07-06
 
 ### Features
@@ -35,3 +58,4 @@ by [git-cliff](https://git-cliff.org).
 ### Maintenance
 
 - Scaffold @zandoh/keysmith placeholder
+

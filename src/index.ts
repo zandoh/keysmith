@@ -8,7 +8,9 @@
  */
 
 export type { Conflict } from "./manage/conflicts";
+export type { LayoutMap } from "./manage/format";
 export { formatBinding } from "./manage/format";
+export { getLayoutMap } from "./manage/layout";
 export type {
   AddCommandOptions,
   CommandInfo,

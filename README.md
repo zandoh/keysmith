@@ -85,13 +85,14 @@ like `shift+/`.
 | Method                                  | Purpose                                            |
 | --------------------------------------- | -------------------------------------------------- |
 | `add(options)`                          | Register a command binding; returns a remover      |
+| `addAll(definitions)`                   | Register a manifest atomically; returns a remover  |
 | `on(id, handler, opts?)`                | Subscribe to a command (`priority`, `AbortSignal`) |
 | `onPattern(pattern, handler)`           | Wildcard subscription, e.g. `"editor:*"`           |
 | `activate(scope)` / `deactivate(scope)` | Control where bindings fire                        |
 | `remap(id, keys \| null)`               | Override or disable a binding at runtime           |
 | `resetKeymap(id?)`                      | Clear one override, or all of them                 |
 | `exportKeymap()` / `importKeymap(map)`  | Serialize and restore user overrides               |
-| `commands()`                            | Metadata and display strings for every command     |
+| `commands(layout?)`                     | Metadata and display strings for every command     |
 | `conflicts()`                           | Current duplicate and prefix collisions            |
 | `destroy()`                             | Remove listeners and registrations                 |
 
@@ -111,16 +112,22 @@ core requirements, each covered by regression tests:
 - Alt chords survive macOS character composition (alt+k types "˚"; the
   binding still fires)
 - Symbols match the produced character regardless of shift state
-- Position mode targets physical keys for spatial layouts like WASD
+- Position mode targets physical keys for spatial layouts like WASD, and
+  `getLayoutMap()` + `commands(layout)` display those bindings using the
+  user's actual key labels where the browser supports it
+
+The matrix runs as Playwright tests through the real browser event pipeline
+(AZERTY, QWERTZ AltGr, Dvorak, macOS composition, IME) alongside the unit
+suite.
 
 ## Server rendering
 
 Importing and constructing are safe without a DOM: no listener attaches, and
 the data APIs (`commands()`, `conflicts()`, keymap import/export) work
-anywhere. Handlers cannot be serialized; ship command definitions as data and
-attach handlers by id on the client. When rendering display strings on the
-server, pass `platform` explicitly. A worked guide is planned in the
-[roadmap](./docs/PLAN.md).
+anywhere. Handlers cannot be serialized; ship command definitions as data
+with `addAll(manifest)` and attach handlers by id on the client. The worked
+pattern, including the platform hint for server-rendered display strings, is
+in [docs/ssr.md](./docs/ssr.md).
 
 ## Status
 

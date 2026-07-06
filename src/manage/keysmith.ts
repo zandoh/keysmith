@@ -17,6 +17,7 @@ import type { ChordMode, ParsedBinding } from "../recognize/parse";
 import { parseBinding } from "../recognize/parse";
 import type { Conflict, ConflictCandidate } from "./conflicts";
 import { findConflict, findConflicts } from "./conflicts";
+import type { LayoutMap } from "./format";
 import { formatBinding } from "./format";
 import { findReserved } from "./reserved";
 
@@ -92,6 +93,12 @@ export interface CommandInfo {
 export interface Keysmith {
   /** Register a command binding. Returns a function that removes it. */
   add: (options: AddCommandOptions) => () => void;
+  /**
+   * Register a manifest of commands atomically: if any entry is invalid,
+   * none are added. Returns a function that removes all of them. Useful
+   * for command definitions shipped as data (see docs/ssr.md).
+   */
+  addAll: (definitions: readonly AddCommandOptions[]) => () => void;
   /** Subscribe to a registered command. Returns an unsubscribe function. */
   on: (commandId: string, handler: TriggerHandler, options?: SubscribeOptions) => () => void;
   /** Subscribe across commands with a wildcard, e.g. "editor:*" or "*". */
@@ -109,8 +116,12 @@ export interface Keysmith {
   exportKeymap: () => Keymap;
   /** Apply a saved keymap; unknown ids and invalid notation are skipped. */
   importKeymap: (keymap: Keymap) => void;
-  /** Every command with its active binding, for cheatsheets and settings. */
-  commands: () => CommandInfo[];
+  /**
+   * Every command with its active binding, for cheatsheets and settings.
+   * Pass a layout map (getLayoutMap()) to display position-mode bindings
+   * in the user's actual layout.
+   */
+  commands: (layout?: LayoutMap | null) => CommandInfo[];
   /** Current duplicate/prefix collisions among registered bindings. */
   conflicts: () => Conflict[];
   /** Remove all listeners and registrations. */
@@ -352,6 +363,19 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     rebuildMatcher();
   }
 
+  function addAll(definitions: readonly AddCommandOptions[]): () => void {
+    const removers: (() => void)[] = [];
+    try {
+      for (const definition of definitions) removers.push(add(definition));
+    } catch (error) {
+      for (const remove of removers.toReversed()) remove();
+      throw error;
+    }
+    return () => {
+      for (const remove of removers.toReversed()) remove();
+    };
+  }
+
   function remap(commandId: string, keys: string | null): void {
     assertAlive();
     const reg = registrations.get(commandId);
@@ -400,7 +424,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     }
   }
 
-  function commands(): CommandInfo[] {
+  function commands(layout: LayoutMap | null = null): CommandInfo[] {
     return [...registrations.values()].map((reg) => {
       const binding = activeBinding(reg);
       return {
@@ -411,7 +435,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
         keys: activeKeys(reg),
         defaultKeys: reg.keys,
         isCustomized: reg.override !== null,
-        display: binding ? formatBinding(binding, platform) : null,
+        display: binding ? formatBinding(binding, platform, layout) : null,
       };
     });
   }
@@ -432,6 +456,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
   return {
     add,
+    addAll,
     on,
     onPattern,
     activate,

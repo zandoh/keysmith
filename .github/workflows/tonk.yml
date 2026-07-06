@@ -1,0 +1,52 @@
+# CI status and release announcements to Discord via the shared tonk layer
+# (secret: DISCORD_WEBHOOK). Personality: .github/discord.yml
+#
+# Releases are published manually (changeset publish runs locally), so the
+# `release` event is user-authored and does trigger this workflow — unlike
+# GITHUB_TOKEN-published releases, which never would.
+name: tonk
+
+on:
+  workflow_run:
+    workflows: [ci, site]
+    types: [completed]
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    if: github.event_name == 'workflow_run'
+    permissions:
+      actions: read # recovery detection reads previous run conclusions
+    uses: zandoh/tonk/.github/workflows/notify.yml@v1
+    secrets:
+      webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  release:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Prepare release notes
+        id: notes
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          NOTES: ${{ github.event.release.body }}
+        run: |
+          {
+            echo "version=${TAG#v}"
+            echo 'body<<TONK_NOTES_EOF'
+            # Discord embeds don't render markdown headers; bold them instead.
+            printf '%s' "$NOTES" | sed -E 's/^#+ +(.*)$/**\1**/'
+            echo
+            echo TONK_NOTES_EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Announce npm publish on Discord
+        uses: zandoh/tonk/actions/discord-notify@v1
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          title: 📦 @zandoh/keysmith ${{ steps.notes.outputs.version }} published to npm
+          description: ${{ steps.notes.outputs.body }}
+          url: https://www.npmjs.com/package/@zandoh/keysmith/v/${{ steps.notes.outputs.version }}
+          color: "5793266"

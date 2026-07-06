@@ -1,0 +1,7 @@
+# tonk notification personality — https://github.com/zandoh/tonk
+# username unset on purpose: posts keep the webhook's default identity,
+# matching how keysmith notifications have always looked.
+notify:
+  failure: true
+  recovery: true
+  pull-requests: false # red PRs are part of iterating

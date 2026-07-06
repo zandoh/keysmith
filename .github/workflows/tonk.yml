@@ -18,6 +18,7 @@ jobs:
     if: github.event_name == 'workflow_run'
     permissions:
       actions: read # recovery detection reads previous run conclusions
+      contents: read # reads .github/discord.yml
     uses: zandoh/tonk/.github/workflows/notify.yml@v1
     secrets:
       webhook: ${{ secrets.TONK_DISCORD_WEBHOOK }}

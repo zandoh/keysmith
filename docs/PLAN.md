@@ -52,10 +52,14 @@ The correctness moat, proven before any manager exists.
 
 ### M3: demo and cheatsheet decision (0.3.0)
 
-- [ ] `demo/` app: a small keyboard-driven UI exercising scopes, sequences,
-      remapping, and a help overlay built from `commands()`
+- [x] `demo/` app: the docs site at zandoh.github.io/keysmith exercises
+      sequences, remapping, and a help overlay built from `commands()`
 - [ ] Decide the cheatsheet-element open question with that experience
 - [ ] Playwright layout matrix (QWERTY, AZERTY, QWERTZ, Dvorak samples)
+- [ ] Server rendering guide (docs/ssr.md): construct-safe usage, the
+      serializable seam (command manifest + handlers-by-id + keymap), the
+      platform hint for server-rendered display strings; consider an
+      `addAll(manifest)` convenience
 
 ### M4: docs and hardening (0.4.0)
 

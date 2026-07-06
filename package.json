@@ -1,21 +1,23 @@
 {
   "name": "@zandoh/keysmith",
   "version": "0.2.0",
-  "description": "Fast, unstyled, accessible hotkey and shortcut manager, built as framework-agnostic web components.",
+  "description": "Keyboard shortcut manager for the web: commands, scopes, sequences, and user remapping. Fast, headless, accessible, framework agnostic.",
   "keywords": [
     "a11y",
-    "accessible",
+    "accessibility",
     "chords",
-    "custom-elements",
     "framework-agnostic",
     "headless",
     "hotkeys",
     "keybindings",
     "keyboard-shortcuts",
-    "unstyled",
-    "web-components"
+    "remapping",
+    "sequences",
+    "shortcut-manager",
+    "shortcuts",
+    "wcag"
   ],
-  "homepage": "https://github.com/zandoh/keysmith#readme",
+  "homepage": "https://zandoh.github.io/keysmith/",
   "bugs": {
     "url": "https://github.com/zandoh/keysmith/issues"
   },

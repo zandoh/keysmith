@@ -70,7 +70,8 @@ The correctness moat, proven before any manager exists.
 
 ## Working agreements
 
-- Conventional commits; changesets for versioning and publishing
+- Conventional commits; changesets for version bumping, git-cliff for
+  CHANGELOG.md and GitHub Release notes (tags: vX.Y.Z at each version commit)
 - `bun run check` (oxlint, oxfmt, tsc, knip) green before every commit
 - Runtime dependencies: `@zandoh/tsbus` and nothing else without a spec
   amendment

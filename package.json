@@ -64,13 +64,16 @@
     "bump": "changeset version",
     "release": "changeset publish",
     "prepare": "simple-git-hooks",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "changelog": "git-cliff -o CHANGELOG.md",
+    "release:notes": "git-cliff --latest --strip header"
   },
   "dependencies": {
     "@zandoh/tsbus": "^0.0.1"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
+    "git-cliff": "^2.13.1",
     "happy-dom": "^20.10.6",
     "knip": "^5",
     "oxfmt": "^0",

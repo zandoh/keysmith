@@ -8,6 +8,7 @@ by [git-cliff](https://git-cliff.org).
 ### Features
 
 - Add docs site with live keysmith demo
+- Add layout-aware display, addAll, ssr guide, and browser tests
 
 ### Bug fixes
 

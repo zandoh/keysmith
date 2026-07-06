@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "@zandoh/keysmith",
+      "dependencies": {
+        "@zandoh/tsbus": "^0.0.1",
+      },
       "devDependencies": {
         "@changesets/cli": "^2.31.0",
         "happy-dom": "^20.10.6",
@@ -361,6 +364,8 @@
     "@vitest/spy": ["@vitest/spy@4.1.9", "", {}, "sha512-fHpsS6mIi+PiEW+vcRVOMkX1oSaPKne3VOclSFICPcGOmfKgXPU5iAah+wcNcj2xPrCCmfq99IDGf+EojhhvhA=="],
 
     "@vitest/utils": ["@vitest/utils@4.1.9", "", { "dependencies": { "@vitest/pretty-format": "4.1.9", "convert-source-map": "^2.0.0", "tinyrainbow": "^3.1.0" } }, "sha512-A51o8ymO5PpqlWNnBP9ZHPXDIpuMtTLlGSjN7la4US+LJzoUMyhwjA5QXlm39JexgwHKW4Xjs8Z2d3dLCXOeuA=="],
+
+    "@zandoh/tsbus": ["@zandoh/tsbus@0.0.1", "", {}, "sha512-/1vdvSAKvFwJkmdMAbsRKSZOexa+NMvSpKDBNWn8L8GA+sU+vHn0YP21rJrxhbsw94J8gJRE2SWZ0vG4d4gZrw=="],
 
     "acorn": ["acorn@8.17.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg=="],
 

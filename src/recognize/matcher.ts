@@ -24,6 +24,11 @@ export interface FeedResult<T> {
   matched: T[];
   /** True while at least one multi-chord sequence is partially entered. */
   pending: boolean;
+  /**
+   * True when this event completed, advanced, or started any binding —
+   * the manager uses it to preventDefault on mid-sequence modifier chords.
+   */
+  advanced: boolean;
 }
 
 export interface MatcherOptions {
@@ -57,6 +62,7 @@ export function createMatcher<T>(
 
     const matched: T[] = [];
     const next: Progress<T>[] = [];
+    let advanced = false;
 
     // Advance in-flight sequences.
     for (const p of progress) {
@@ -67,6 +73,7 @@ export function createMatcher<T>(
       }
       const chord = p.entry.binding.chords[p.index];
       if (chord && matchChord(chord, p.entry.binding.mode, k, options.platform)) {
+        advanced = true;
         if (p.index === p.entry.binding.chords.length - 1) {
           matched.push(p.entry.data);
         } else {
@@ -82,6 +89,7 @@ export function createMatcher<T>(
       if (k.repeat && !entry.allowRepeat) continue;
       const first = entry.binding.chords[0];
       if (!first || !matchChord(first, entry.binding.mode, k, options.platform)) continue;
+      advanced = true;
       if (entry.binding.chords.length === 1) {
         matched.push(entry.data);
       } else {
@@ -90,7 +98,7 @@ export function createMatcher<T>(
     }
 
     progress = next;
-    return { matched, pending: progress.length > 0 };
+    return { matched, pending: progress.length > 0, advanced };
   }
 
   function reset(): void {

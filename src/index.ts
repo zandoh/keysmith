@@ -4,10 +4,19 @@
  * Keyboard shortcut manager for the web. Fast, unstyled, accessible,
  * framework agnostic.
  *
- * Work in progress; see docs/SPEC.md for the design. Currently exposes the
- * M0 layers: notation parsing, event normalization, and recognition.
+ * See docs/SPEC.md for the design.
  */
 
+export type { Conflict } from "./manage/conflicts";
+export type {
+  AddCommandOptions,
+  Keysmith,
+  KeysmithOptions,
+  SubscribeOptions,
+  TriggerHandler,
+  TriggerPayload,
+} from "./manage/keysmith";
+export { createKeysmith } from "./manage/keysmith";
 export { chordIsModified, firesInEditable, isEditableTarget } from "./normalize/editable";
 export type { NormalizedKey } from "./normalize/event";
 export { normalizeEvent } from "./normalize/event";

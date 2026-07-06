@@ -8,8 +8,11 @@
  */
 
 export type { Conflict } from "./manage/conflicts";
+export { formatBinding } from "./manage/format";
 export type {
   AddCommandOptions,
+  CommandInfo,
+  Keymap,
   Keysmith,
   KeysmithOptions,
   SubscribeOptions,

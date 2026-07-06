@@ -17,6 +17,8 @@ import type { ChordMode, ParsedBinding } from "../recognize/parse";
 import { parseBinding } from "../recognize/parse";
 import type { Conflict, ConflictCandidate } from "./conflicts";
 import { findConflict, findConflicts } from "./conflicts";
+import { formatBinding } from "./format";
+import { findReserved } from "./reserved";
 
 export interface TriggerPayload {
   commandId: string;
@@ -63,6 +65,28 @@ export interface KeysmithOptions {
   sequenceTimeout?: number;
   /** Receives handler errors (default console.error). */
   onError?: (error: unknown) => void;
+  /**
+   * Also dispatch each trigger as CustomEvent("keysmith:<id>") on document,
+   * before bus handlers run; calling preventDefault on it vetoes them.
+   */
+  domEvents?: boolean;
+}
+
+/** A keymap: command ids mapped to override notation, or null for disabled. */
+export type Keymap = Record<string, string | null>;
+
+export interface CommandInfo {
+  id: string;
+  scope: string;
+  description: string | undefined;
+  group: string | undefined;
+  /** Active notation, null while disabled by the user. */
+  keys: string | null;
+  defaultKeys: string;
+  /** True when a remap or disable is in effect. */
+  isCustomized: boolean;
+  /** Platform-formatted active binding ("⌘S" / "Ctrl+S"), null if disabled. */
+  display: string | null;
 }
 
 export interface Keysmith {
@@ -74,6 +98,19 @@ export interface Keysmith {
   onPattern: (pattern: string, handler: TriggerHandler, options?: SubscribeOptions) => () => void;
   activate: (scope: string) => void;
   deactivate: (scope: string) => void;
+  /**
+   * Override a command's keys at runtime, or disable it with null — the
+   * WCAG 2.1.4 mechanism. Command identity and handlers are unaffected.
+   */
+  remap: (commandId: string, keys: string | null) => void;
+  /** Clear one command's override, or every override. */
+  resetKeymap: (commandId?: string) => void;
+  /** Current overrides as a plain serializable object. */
+  exportKeymap: () => Keymap;
+  /** Apply a saved keymap; unknown ids and invalid notation are skipped. */
+  importKeymap: (keymap: Keymap) => void;
+  /** Every command with its active binding, for cheatsheets and settings. */
+  commands: () => CommandInfo[];
   /** Current duplicate/prefix collisions among registered bindings. */
   conflicts: () => Conflict[];
   /** Remove all listeners and registrations. */
@@ -83,13 +120,26 @@ export interface Keysmith {
 interface Registration {
   id: string;
   scope: string;
+  /** The default (registered) notation and binding; overrides sit beside them. */
   keys: string;
   binding: ParsedBinding;
+  override: { keys: string | null; binding: ParsedBinding | null } | null;
+  mode: ChordMode;
+  description: string | undefined;
+  group: string | undefined;
   scopedEvent: string;
   allowRepeat: boolean;
   allowInEditable: boolean | undefined;
   preventDefault: boolean;
   removeTrigger?: () => void;
+}
+
+function activeKeys(reg: Registration): string | null {
+  return reg.override ? reg.override.keys : reg.keys;
+}
+
+function activeBinding(reg: Registration): ParsedBinding | null {
+  return reg.override ? reg.override.binding : reg.binding;
 }
 
 const ID_PATTERN = /^[^\s:]+$/;
@@ -100,8 +150,12 @@ function validateName(kind: "command id" | "scope", value: string): void {
   }
 }
 
-function candidateOf(reg: Registration): ConflictCandidate {
-  return { id: reg.id, scope: reg.scope, keys: reg.keys, binding: reg.binding };
+/** Conflict candidate from a registration's ACTIVE binding; null if disabled. */
+function candidateOf(reg: Registration): ConflictCandidate | null {
+  const binding = activeBinding(reg);
+  const keys = activeKeys(reg);
+  if (!binding || keys === null) return null;
+  return { id: reg.id, scope: reg.scope, keys, binding };
 }
 
 function subscribe(unsubscribe: () => void, signal?: AbortSignal): () => void {
@@ -144,9 +198,38 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     const entries: MatcherEntry<Registration>[] = [];
     for (const reg of registrations.values()) {
       if (!activeScopes.has(reg.scope)) continue;
-      entries.push({ binding: reg.binding, data: reg, allowRepeat: reg.allowRepeat });
+      const binding = activeBinding(reg);
+      if (!binding) continue; // disabled via remap(id, null)
+      entries.push({ binding, data: reg, allowRepeat: reg.allowRepeat });
     }
     matcher = createMatcher(entries, { platform, timeout: options.sequenceTimeout });
+  }
+
+  function warnReserved(id: string, binding: ParsedBinding): void {
+    const reserved = findReserved(binding, platform);
+    if (reserved) {
+      console.warn(
+        `keysmith: "${id}" binds "${reserved}", which the browser or OS may claim before the page sees it`,
+      );
+    }
+  }
+
+  function warnConflictsWith(reg: Registration): void {
+    const candidate = candidateOf(reg);
+    if (!candidate) return;
+    for (const existing of registrations.values()) {
+      if (existing === reg) continue;
+      const other = candidateOf(existing);
+      if (!other) continue;
+      const conflict = findConflict(other, candidate);
+      if (conflict) {
+        console.warn(
+          `keysmith: "${conflict.commandIds[0]}" (${conflict.keys[0]}) and ` +
+            `"${conflict.commandIds[1]}" (${conflict.keys[1]}) collide (${conflict.kind}); ` +
+            `see conflicts()`,
+        );
+      }
+    }
   }
 
   function onKeydown(event: Event): void {
@@ -169,6 +252,17 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
     for (const reg of fired) {
       const payload: TriggerPayload = { commandId: reg.id, scope: reg.scope, event };
+
+      // The DOM surface fires first; preventDefault on it vetoes handlers.
+      if (options.domEvents && typeof document !== "undefined") {
+        const domEvent = new CustomEvent(`keysmith:${reg.id}`, {
+          detail: payload,
+          bubbles: true,
+          cancelable: true,
+        });
+        if (!document.dispatchEvent(domEvent)) continue;
+      }
+
       void bus.emit(reg.scopedEvent, payload);
     }
   }
@@ -188,34 +282,31 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
       throw new Error(`keysmith: command "${id}" is already registered`);
     }
 
-    const binding = parseBinding(commandOptions.keys, commandOptions.mode ?? "character");
+    const mode = commandOptions.mode ?? "character";
+    const binding = parseBinding(commandOptions.keys, mode);
     const reg: Registration = {
       id,
       scope,
       keys: commandOptions.keys,
       binding,
+      override: null,
+      mode,
+      description: commandOptions.description,
+      group: commandOptions.group,
       scopedEvent: `${scope}:${id}`,
       allowRepeat: commandOptions.allowRepeat ?? false,
       allowInEditable: commandOptions.allowInEditable,
       preventDefault: commandOptions.preventDefault ?? true,
     };
 
-    for (const existing of registrations.values()) {
-      const conflict = findConflict(candidateOf(existing), candidateOf(reg));
-      if (conflict) {
-        console.warn(
-          `keysmith: "${conflict.commandIds[0]}" (${conflict.keys[0]}) and ` +
-            `"${conflict.commandIds[1]}" (${conflict.keys[1]}) collide (${conflict.kind}); ` +
-            `see conflicts()`,
-        );
-      }
-    }
+    warnReserved(id, binding);
 
     if (commandOptions.onTrigger) {
       reg.removeTrigger = bus.on(reg.scopedEvent, guard(commandOptions.onTrigger));
     }
 
     registrations.set(id, reg);
+    warnConflictsWith(reg);
     rebuildMatcher();
 
     return () => {
@@ -270,8 +361,72 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     rebuildMatcher();
   }
 
+  function remap(commandId: string, keys: string | null): void {
+    assertAlive();
+    const reg = registrations.get(commandId);
+    if (!reg) throw new Error(`keysmith: unknown command "${commandId}"`);
+
+    if (keys === null) {
+      reg.override = { keys: null, binding: null };
+    } else {
+      const binding = parseBinding(keys, reg.mode);
+      reg.override = { keys, binding };
+      warnReserved(commandId, binding);
+      warnConflictsWith(reg);
+    }
+    rebuildMatcher();
+  }
+
+  function resetKeymap(commandId?: string): void {
+    assertAlive();
+    if (commandId !== undefined) {
+      const reg = registrations.get(commandId);
+      if (!reg) throw new Error(`keysmith: unknown command "${commandId}"`);
+      reg.override = null;
+    } else {
+      for (const reg of registrations.values()) reg.override = null;
+    }
+    rebuildMatcher();
+  }
+
+  function exportKeymap(): Keymap {
+    const keymap: Keymap = {};
+    for (const reg of registrations.values()) {
+      if (reg.override) keymap[reg.id] = reg.override.keys;
+    }
+    return keymap;
+  }
+
+  function importKeymap(keymap: Keymap): void {
+    assertAlive();
+    for (const [id, keys] of Object.entries(keymap)) {
+      if (!registrations.has(id)) continue; // stale entry from an older app version
+      try {
+        remap(id, keys);
+      } catch (error) {
+        console.warn(`keysmith: skipping keymap entry for "${id}"`, error);
+      }
+    }
+  }
+
+  function commands(): CommandInfo[] {
+    return [...registrations.values()].map((reg) => {
+      const binding = activeBinding(reg);
+      return {
+        id: reg.id,
+        scope: reg.scope,
+        description: reg.description,
+        group: reg.group,
+        keys: activeKeys(reg),
+        defaultKeys: reg.keys,
+        isCustomized: reg.override !== null,
+        display: binding ? formatBinding(binding, platform) : null,
+      };
+    });
+  }
+
   function conflicts(): Conflict[] {
-    return findConflicts([...registrations.values()].map(candidateOf));
+    return findConflicts([...registrations.values()].map(candidateOf).filter((c) => c !== null));
   }
 
   function destroy(): void {
@@ -284,5 +439,18 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
     matcher.reset();
   }
 
-  return { add, on, onPattern, activate, deactivate, conflicts, destroy };
+  return {
+    add,
+    on,
+    onPattern,
+    activate,
+    deactivate,
+    remap,
+    resetKeymap,
+    exportKeymap,
+    importKeymap,
+    commands,
+    conflicts,
+    destroy,
+  };
 }

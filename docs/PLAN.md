@@ -43,11 +43,12 @@ The correctness moat, proven before any manager exists.
 
 ### M2: remapping and the DOM surface (0.2.0)
 
-- [ ] `remap()`, disable-binding support, `exportKeymap()`/`importKeymap()`
-- [ ] Reserved-key warnings (browser/AT shortcuts)
-- [ ] Optional `domEvents` CustomEvent surface
-- [ ] `commands()` introspection with layout-aware display strings
-- [ ] Document the WCAG 2.1.4 story with a worked example
+- [x] `remap()`, disable-binding support, `exportKeymap()`/`importKeymap()`
+- [x] Reserved-key warnings (browser/AT shortcuts)
+- [x] Optional `domEvents` CustomEvent surface
+- [x] `commands()` introspection with platform display strings
+      (layout-aware display via KeyboardLayoutMap moves to M3)
+- [x] Document the WCAG 2.1.4 story with a worked example (docs/remapping.md)
 
 ### M3: demo and cheatsheet decision (0.3.0)
 

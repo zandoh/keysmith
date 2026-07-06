@@ -25,12 +25,12 @@ docs/           SPEC.md, PLAN.md, API docs as they land
 
 The correctness moat, proven before any manager exists.
 
-- [ ] Notation grammar and chord parser with parse errors
-- [ ] KeyboardEvent normalization: character vs position mode, `mod`
+- [x] Notation grammar and chord parser with parse errors
+- [x] KeyboardEvent normalization: character vs position mode, `mod`
       canonicalization, AltGr/dead-key/IME/autorepeat handling
-- [ ] Sequence buffer with timeouts, chord-then-sequence support
-- [ ] Editable-context guard
-- [ ] Unit test matrix from published incumbent failure modes; CI (bun:
+- [x] Sequence buffer with timeouts, chord-then-sequence support
+- [x] Editable-context guard
+- [x] Unit test matrix from published incumbent failure modes; CI (bun:
       check, test, build) mirroring the existing workflow setup
 
 ### M1: manager core (0.1.0)

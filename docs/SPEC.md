@@ -179,8 +179,10 @@ element instead of `window`.
   requires amending this spec.
 - SSR-safe: importing is side-effect free; `createKeysmith` guards on
   `typeof window`.
-- Size budget (min+gzip, CI-enforced): core at most 4 kB, tsbus included at
-  most 6 kB.
+- Size budget (min+gzip, CI-enforced): standalone at most 5.5 kB, tsbus
+  included at most 7.5 kB. (Amended from the pre-implementation 4/6 kB
+  guess after measuring the real 0.3.0 surface at 4.9/6.9 kB; the revised
+  numbers leave working headroom while still failing the build on bloat.)
 - Works in every framework by construction; adapters (a React hook wrapper)
   are documentation examples, not packages, until demand proves otherwise.
 
@@ -199,13 +201,18 @@ element instead of `window`.
 
 ## 6. Open questions
 
-- Notation: adopt tinykeys-style `$mod` or plain `mod`? Leaning plain `mod`
-  (`mod+k`, `g i`, `shift+?`) with a published grammar.
-- Scope model: flat set of named scopes (as specced) or hierarchical
-  (`editor.vim` implies `editor`)? Start flat; hierarchy only with evidence.
-- Should `onTrigger` in `add()` exist at all, or should subscription be the
-  only handler path? Convenience vs. one-way-to-do-it.
-- Cheatsheet element: worth shipping, or is `commands()` plus a documented
-  example enough? Decide at M3 with real usage.
-- Sequence timeout default (1000 ms) and whether it should be per-instance
-  configurable only, or per-binding.
+All resolved as of 0.3.x:
+
+- **Notation:** plain `mod` (`mod+k`, `g i`), shipped in 0.1.0. tinykeys'
+  `$mod` sigil bought nothing over the strict grammar.
+- **Scope model:** flat sets, shipped. No hierarchy demand has appeared;
+  revisit only with a concrete case.
+- **`onTrigger` in `add()`:** kept. The demo site and every quick-start
+  reads better with it, and it shares the dispatch path with `on()`.
+- **Cheatsheet element: not shipping.** The demo site builds a complete
+  overlay from `commands()` in ~25 lines of vanilla DOM (see
+  docs/cheatsheet.md for the recipe). A shipped element would reintroduce
+  exactly the styling and framework surface keysmith exists to avoid;
+  "no UI" stays literal.
+- **Sequence timeout:** per-instance only (default 1000 ms). Per-binding
+  timeouts wait for a real use case.

@@ -206,6 +206,26 @@ describe("preventDefault", () => {
     const g = press("g");
     expect(g.defaultPrevented).toBe(false);
   });
+
+  it("does not preventDefault when a modifier binding is opted out in editable", () => {
+    const keys = make();
+    keys.add({ id: "bold", keys: "mod+b", allowInEditable: false });
+    const input = document.createElement("input");
+    document.body.append(input);
+
+    const event = press("b", { ctrlKey: true }, input);
+    expect(event.defaultPrevented).toBe(false); // native editing key preserved
+  });
+
+  it("still preventDefaults a modifier binding that fires in editable", () => {
+    const keys = make();
+    keys.add({ id: "save", keys: "mod+s" }); // modifier chords fire in editable by default
+    const input = document.createElement("input");
+    document.body.append(input);
+
+    const event = press("s", { ctrlKey: true }, input);
+    expect(event.defaultPrevented).toBe(true);
+  });
 });
 
 describe("conflicts", () => {

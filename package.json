@@ -30,7 +30,8 @@
     "url": "git+https://github.com/zandoh/keysmith.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.map"
   ],
   "type": "module",
   "sideEffects": false,

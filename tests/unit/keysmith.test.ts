@@ -228,6 +228,31 @@ describe("conflicts", () => {
     keys.add({ id: "b", keys: "j", scope: "editor" });
     expect(keys.conflicts()).toHaveLength(0);
   });
+
+  it("reports mod vs explicit-modifier duplicates on non-mac", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const keys = make({ platform: "other" }); // mod -> ctrl
+    keys.add({ id: "save.mod", keys: "mod+s" });
+    keys.add({ id: "save.ctrl", keys: "ctrl+s" });
+    const found = keys.conflicts();
+    expect(found).toHaveLength(1);
+    expect(found[0]?.kind).toBe("duplicate");
+  });
+
+  it("reports mod vs meta duplicates on mac", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const keys = make({ platform: "mac" }); // mod -> meta
+    keys.add({ id: "save.mod", keys: "mod+s" });
+    keys.add({ id: "save.meta", keys: "meta+s" });
+    expect(keys.conflicts()).toHaveLength(1);
+  });
+
+  it("does not conflate mod with the wrong modifier per platform", () => {
+    const keys = make({ platform: "mac" }); // mod -> meta, so ctrl+s is distinct
+    keys.add({ id: "save.mod", keys: "mod+s" });
+    keys.add({ id: "save.ctrl", keys: "ctrl+s" });
+    expect(keys.conflicts()).toHaveLength(0);
+  });
 });
 
 describe("lifecycle", () => {

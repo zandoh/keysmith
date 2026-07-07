@@ -6,6 +6,7 @@
 import type { NormalizedKey } from "../normalize/event";
 import type { Platform } from "../normalize/platform";
 import type { ChordMode, ParsedChord } from "./parse";
+import { resolveMod } from "./parse";
 
 export function matchChord(
   chord: ParsedChord,
@@ -13,8 +14,7 @@ export function matchChord(
   k: NormalizedKey,
   platform: Platform,
 ): boolean {
-  const wantCtrl = chord.ctrl || (chord.mod && platform !== "mac");
-  const wantMeta = chord.meta || (chord.mod && platform === "mac");
+  const { ctrl: wantCtrl, meta: wantMeta } = resolveMod(chord, platform);
 
   // AltGr reports as ctrl+alt on Windows layouts. A chord requiring both is
   // indistinguishable from text entry there, so it never matches while

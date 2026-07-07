@@ -7,6 +7,8 @@
  * caught at registration time with messages that say how to fix them.
  */
 
+import type { Platform } from "../normalize/platform";
+
 export type ChordMode = "character" | "position";
 export type BaseKind = "letter" | "digit" | "symbol" | "named";
 
@@ -28,6 +30,21 @@ export interface ParsedChord {
 export interface ParsedBinding {
   chords: ParsedChord[];
   mode: ChordMode;
+}
+
+/**
+ * Resolve `mod` to concrete ctrl/meta for a platform: Meta on macOS, Control
+ * elsewhere. The single source of truth for `mod` semantics, shared by the
+ * matcher, the reserved-key table, and conflict detection.
+ */
+export function resolveMod(
+  chord: Pick<ParsedChord, "mod" | "ctrl" | "meta">,
+  platform: Platform,
+): { ctrl: boolean; meta: boolean } {
+  return {
+    ctrl: chord.ctrl || (chord.mod && platform !== "mac"),
+    meta: chord.meta || (chord.mod && platform === "mac"),
+  };
 }
 
 export class BindingParseError extends Error {

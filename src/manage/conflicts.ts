@@ -6,7 +6,9 @@
  * both "g" and "g i" means "g" always fires.
  */
 
+import type { Platform } from "../normalize/platform";
 import type { ParsedBinding, ParsedChord } from "../recognize/parse";
+import { resolveMod } from "../recognize/parse";
 
 export interface ConflictCandidate {
   id: string;
@@ -26,20 +28,26 @@ function scopesOverlap(a: string, b: string): boolean {
   return a === b || a === "global" || b === "global";
 }
 
-function serializeChord(chord: ParsedChord): string {
-  const mods = `${+chord.mod}${+chord.ctrl}${+chord.alt}${+chord.shift}${+chord.meta}`;
-  return `${mods}:${chord.key}`;
+function serializeChord(chord: ParsedChord, platform: Platform): string {
+  // Resolve `mod` to concrete ctrl/meta before comparing, so "mod+s" and
+  // "ctrl+s" (which fire on the same keystroke off macOS) serialize alike.
+  const { ctrl, meta } = resolveMod(chord, platform);
+  return `${+ctrl}${+chord.alt}${+chord.shift}${+meta}:${chord.key}`;
 }
 
-function serialize(binding: ParsedBinding): string[] {
-  return binding.chords.map((chord) => `${binding.mode}|${serializeChord(chord)}`);
+function serialize(binding: ParsedBinding, platform: Platform): string[] {
+  return binding.chords.map((chord) => `${binding.mode}|${serializeChord(chord, platform)}`);
 }
 
-export function findConflict(a: ConflictCandidate, b: ConflictCandidate): Conflict | null {
+export function findConflict(
+  a: ConflictCandidate,
+  b: ConflictCandidate,
+  platform: Platform,
+): Conflict | null {
   if (!scopesOverlap(a.scope, b.scope)) return null;
 
-  const sa = serialize(a.binding);
-  const sb = serialize(b.binding);
+  const sa = serialize(a.binding, platform);
+  const sb = serialize(b.binding, platform);
   const shared = Math.min(sa.length, sb.length);
   for (let i = 0; i < shared; i++) {
     if (sa[i] !== sb[i]) return null;
@@ -53,14 +61,17 @@ export function findConflict(a: ConflictCandidate, b: ConflictCandidate): Confli
   };
 }
 
-export function findConflicts(candidates: readonly ConflictCandidate[]): Conflict[] {
+export function findConflicts(
+  candidates: readonly ConflictCandidate[],
+  platform: Platform,
+): Conflict[] {
   const conflicts: Conflict[] = [];
   for (let i = 0; i < candidates.length; i++) {
     for (let j = i + 1; j < candidates.length; j++) {
       const a = candidates[i];
       const b = candidates[j];
       if (!a || !b) continue;
-      const conflict = findConflict(a, b);
+      const conflict = findConflict(a, b, platform);
       if (conflict) conflicts.push(conflict);
     }
   }

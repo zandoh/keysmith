@@ -224,7 +224,7 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
       if (existing === reg) continue;
       const other = candidateOf(existing);
       if (!other) continue;
-      const conflict = findConflict(other, candidate);
+      const conflict = findConflict(other, candidate, platform);
       if (conflict) {
         console.warn(
           `keysmith: "${conflict.commandIds[0]}" (${conflict.keys[0]}) and ` +
@@ -441,7 +441,10 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
   }
 
   function conflicts(): Conflict[] {
-    return findConflicts([...registrations.values()].map(candidateOf).filter((c) => c !== null));
+    return findConflicts(
+      [...registrations.values()].map(candidateOf).filter((c) => c !== null),
+      platform,
+    );
   }
 
   function destroy(): void {

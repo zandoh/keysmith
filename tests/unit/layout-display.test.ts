@@ -98,4 +98,23 @@ describe("addAll", () => {
     ).toThrow(/unknown modifier/);
     expect(keys.commands()).toHaveLength(0);
   });
+
+  it("every command in a batch fires after the single rebuild", async () => {
+    const keys = make();
+    const a = vi.fn();
+    const b = vi.fn();
+    keys.addAll([
+      { id: "one", keys: "mod+1", onTrigger: a },
+      { id: "two", keys: "mod+2", onTrigger: b },
+    ]);
+
+    for (const key of ["1", "2"]) {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key, ctrlKey: true, bubbles: true, cancelable: true }),
+      );
+    }
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(a).toHaveBeenCalledOnce();
+    expect(b).toHaveBeenCalledOnce();
+  });
 });

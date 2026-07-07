@@ -194,10 +194,14 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
   let matcher: Matcher<Registration> = createMatcher([], { platform });
   let destroyed = false;
+  // While true, rebuildMatcher() is a no-op so a batch (addAll/importKeymap)
+  // can apply every entry and rebuild the matcher exactly once at the end.
+  let deferRebuild = false;
 
   const target = options.target ?? (typeof window === "undefined" ? undefined : (window as Window));
 
   function rebuildMatcher(): void {
+    if (deferRebuild) return;
     const entries: MatcherEntry<Registration>[] = [];
     for (const reg of registrations.values()) {
       if (!activeScopes.has(reg.scope)) continue;
@@ -369,14 +373,28 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
   function addAll(definitions: readonly AddCommandOptions[]): () => void {
     const removers: (() => void)[] = [];
+    const previous = deferRebuild;
+    deferRebuild = true;
     try {
       for (const definition of definitions) removers.push(add(definition));
     } catch (error) {
       for (const remove of removers.toReversed()) remove();
+      deferRebuild = previous;
+      rebuildMatcher();
       throw error;
     }
+    deferRebuild = previous;
+    rebuildMatcher();
+
     return () => {
-      for (const remove of removers.toReversed()) remove();
+      const prior = deferRebuild;
+      deferRebuild = true;
+      try {
+        for (const remove of removers.toReversed()) remove();
+      } finally {
+        deferRebuild = prior;
+      }
+      rebuildMatcher();
     };
   }
 
@@ -418,14 +436,21 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
   function importKeymap(keymap: Keymap): void {
     assertAlive();
-    for (const [id, keys] of Object.entries(keymap)) {
-      if (!registrations.has(id)) continue; // stale entry from an older app version
-      try {
-        remap(id, keys);
-      } catch (error) {
-        console.warn(`keysmith: skipping keymap entry for "${id}"`, error);
+    const previous = deferRebuild;
+    deferRebuild = true;
+    try {
+      for (const [id, keys] of Object.entries(keymap)) {
+        if (!registrations.has(id)) continue; // stale entry from an older app version
+        try {
+          remap(id, keys);
+        } catch (error) {
+          console.warn(`keysmith: skipping keymap entry for "${id}"`, error);
+        }
       }
+    } finally {
+      deferRebuild = previous;
     }
+    rebuildMatcher();
   }
 
   function commands(layout: LayoutMap | null = null): CommandInfo[] {

@@ -8,7 +8,7 @@
 
 import type { Platform } from "../normalize/platform";
 import type { ParsedBinding, ParsedChord } from "../recognize/parse";
-import { parseBinding } from "../recognize/parse";
+import { parseBinding, resolveMod } from "../recognize/parse";
 
 /** Notation for combinations the browser or OS claims. */
 const RESERVED_NOTATION = [
@@ -29,8 +29,7 @@ const RESERVED_NOTATION = [
 const tables = new Map<Platform, Map<string, string>>();
 
 function resolveChord(chord: ParsedChord, platform: Platform): string {
-  const ctrl = chord.ctrl || (chord.mod && platform !== "mac");
-  const meta = chord.meta || (chord.mod && platform === "mac");
+  const { ctrl, meta } = resolveMod(chord, platform);
   return `${+ctrl}${+chord.alt}${+chord.shift}${+meta}:${chord.key}`;
 }
 

@@ -248,9 +248,13 @@ export function createKeysmith(options: KeysmithOptions = {}): Keysmith {
 
     // Mid-sequence modifier chords ("mod+k" of "mod+k mod+s") also suppress
     // the browser default; unmodified sequence steps like "g" stay typeable.
+    // Gate on `result.matched.length` (nothing completed anywhere), not
+    // `fired.length`: a completed match filtered out by the editable guard
+    // (an allowInEditable:false chord in a text field) must leave the browser
+    // default alone, not eat it.
     const prevent =
       fired.some((reg) => reg.preventDefault) ||
-      (fired.length === 0 && result.advanced && (k.ctrl || k.alt || k.meta));
+      (result.matched.length === 0 && result.advanced && (k.ctrl || k.alt || k.meta));
     if (prevent) event.preventDefault();
 
     for (const reg of fired) {

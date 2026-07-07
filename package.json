@@ -65,7 +65,7 @@
     "test": "vitest run",
     "check": "oxlint && oxfmt --check && tsc --noEmit && knip",
     "bump": "changeset version",
-    "release": "changeset publish",
+    "release": "changeset publish && bun scripts/release-github.ts",
     "prepare": "simple-git-hooks",
     "prepublishOnly": "bun run check && bun run test && bun run build",
     "changelog": "git-cliff -o CHANGELOG.md",

@@ -19,7 +19,7 @@ jobs:
     permissions:
       actions: read # recovery detection reads previous run conclusions
       contents: read # reads .github/discord.yml
-    uses: zandoh/tonk/.github/workflows/notify.yml@v1
+    uses: zandoh/tonk/.github/workflows/notify.yml@v2
     secrets:
       webhook: ${{ secrets.TONK_DISCORD_WEBHOOK }}
 
@@ -44,7 +44,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Announce npm publish on Discord
-        uses: zandoh/tonk/actions/discord-notify@v1
+        uses: zandoh/tonk@v2
         with:
           webhook-url: ${{ secrets.TONK_DISCORD_WEBHOOK }}
           title: 📦 @zandoh/keysmith ${{ steps.notes.outputs.version }} published to npm

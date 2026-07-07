@@ -1,6 +1,6 @@
 # tonk notification personality — https://github.com/zandoh/tonk
-# username unset on purpose: posts keep the webhook's default identity,
-# matching how keysmith notifications have always looked.
+# username unset on purpose: posts use the tonk brand default (name + icon
+# as of tonk v2.1.0).
 notify:
   failure: true
   recovery: true

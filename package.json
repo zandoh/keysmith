@@ -1,6 +1,6 @@
 {
   "name": "@zandoh/keysmith",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Keyboard shortcut manager for the web: commands, scopes, sequences, and user remapping. Fast, headless, accessible, framework agnostic.",
   "keywords": [
     "a11y",

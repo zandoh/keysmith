@@ -3,6 +3,60 @@
 Generated from [Conventional Commits](https://www.conventionalcommits.org)
 by [git-cliff](https://git-cliff.org).
 
+## [0.3.2] - 2026-07-07
+
+### Bug fixes
+
+- **conflicts:** Resolve mod to ctrl/meta before comparing bindings
+- **keysmith:** Do not preventDefault when an editable-opted-out binding matches
+
+### Performance
+
+- **keysmith:** Rebuild the matcher once per addAll/importKeymap batch
+
+### Documentation
+
+- Add AGENTS.md with build, size-budget, and release invariants
+- **spec:** Mark spec as shipped and drop the retired cheatsheet subpath
+
+### CI
+
+- **release:** Create GitHub Release as part of `bun run release`
+- Cache bun store and playwright browser to speed up runs
+
+## [0.3.1] - 2026-07-07
+
+### Bug fixes
+
+- **ci:** Grant contents:read so tonk can fetch discord.yml
+
+### Refactoring
+
+- Migrate Discord notifications to shared tonk layer
+
+### Documentation
+
+- Resolve all spec open questions
+- Update discord.yml comment for tonk v2.1.0 brand defaults
+
+### Testing
+
+- Add framework smoke tests for react, vue, and svelte
+
+### CI
+
+- Enforce size budgets
+- Notify discord of failures, recoveries, and releases
+- Namespace Discord webhook secrets with TONK\_ prefix
+- Migrate to tonk v2
+- Run checks and tests before pages deploy and npm publish
+
+### Maintenance
+
+- **ci:** Add temporary encrypted secret export for tonk re-keying
+- **ci:** Remove temporary secret export workflow
+- **build:** Exclude sourcemaps from published package
+
 ## [0.3.0] - 2026-07-06
 
 ### Features
@@ -21,6 +75,7 @@ by [git-cliff](https://git-cliff.org).
 ### Documentation
 
 - Professional readme pass and accurate package metadata
+- **changelog:** Regenerate for 0.3.0
 
 ### Maintenance
 

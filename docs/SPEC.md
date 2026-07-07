@@ -3,7 +3,8 @@
 A keyboard shortcut manager for the web. Fast, unstyled, accessible, framework
 agnostic.
 
-Status: draft, pre-implementation.
+Status: shipped (0.x). This spec describes the implemented design; see
+[PLAN.md](./PLAN.md) for the roadmap and current milestone.
 
 ## 1. Positioning
 
@@ -172,8 +173,11 @@ element instead of `window`.
 
 ```
 @zandoh/keysmith           core: normalize + recognize + manage + dispatch
-@zandoh/keysmith/cheatsheet  (later) optional unstyled <keysmith-cheatsheet> element
 ```
+
+No subpath packages ship. A `@zandoh/keysmith/cheatsheet` element was
+considered and deliberately rejected (see §6); the recipe for building one from
+`commands()` lives in [cheatsheet.md](./cheatsheet.md).
 
 - Runtime dependency: `@zandoh/tsbus` and nothing else. Adding another
   requires amending this spec.

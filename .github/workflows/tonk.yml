@@ -10,6 +10,8 @@ on:
   workflow_run:
     workflows: [ci, site]
     types: [completed]
+  pull_request:
+    types: [opened, reopened, closed]
   release:
     types: [published]
 
@@ -20,6 +22,14 @@ jobs:
       actions: read # recovery detection reads previous run conclusions
       contents: read # reads .github/discord.yml
     uses: zandoh/tonk/.github/workflows/notify.yml@v2
+    secrets:
+      webhook: ${{ secrets.TONK_DISCORD_WEBHOOK }}
+
+  pr:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read # reads .github/discord.yml
+    uses: zandoh/tonk/.github/workflows/pr.yml@v2
     secrets:
       webhook: ${{ secrets.TONK_DISCORD_WEBHOOK }}
 

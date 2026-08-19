@@ -84,7 +84,7 @@
     "@types/react-dom": "^19.2.3",
     "git-cliff": "^2.13.1",
     "happy-dom": "^20.10.6",
-    "knip": "^5",
+    "knip": "^6",
     "oxfmt": "^0",
     "oxlint": "^1",
     "react": "^19.2.7",
